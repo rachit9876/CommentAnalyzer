@@ -43,6 +43,3 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
----
-
-Let me know if you want badges, license, screenshots, or contributor info added!

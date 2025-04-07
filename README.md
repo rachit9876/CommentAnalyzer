@@ -4,11 +4,11 @@
 
 ## 🚀 Quickstart
 
-Open a terminal and run:
+Open your terminal and follow these steps:
 
 ```bash
-mkdir CommentAnalyzer
-cd CommentAnalyzer
+cd C:\
+mkdir CommentAnalyzer && cd CommentAnalyzer
 ```
 
 ### 1. Create a Virtual Environment (optional but recommended)

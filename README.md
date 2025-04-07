@@ -6,7 +6,7 @@
 
 ## 🚀 Quickstart
 
-Open your terminal or command prompt and follow these steps:
+Open your terminal or command prompt and paste all of them one by one:
 
 ```bash
 cd C:\

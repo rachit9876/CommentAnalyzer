@@ -4,9 +4,7 @@
 
 ---
 
-## 🚀 Quickstart
-
-Open your terminal or command prompt and paste all of them one by one:
+## Open your terminal or command prompt and paste all of them one by one:
 
 ```bash
 cd C:\

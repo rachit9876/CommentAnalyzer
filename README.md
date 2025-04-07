@@ -4,7 +4,7 @@
 
 ## 🚀 Quickstart
 
-Open your terminal and follow these steps:
+Open your cmd/terminal and follow these steps:
 
 ```bash
 cd C:\

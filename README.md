@@ -69,10 +69,14 @@ pip install -r requirements.txt
 
 ---
 
-### 4. Run the App 🚀
+### 4. Run the App 
 
 Launch the app using:
 
 ```bash
 streamlit run app.py
+```
+### Thank You Follow Me On IG:
+```bash
+https://www.instagram.com/rachit.zip
 ```

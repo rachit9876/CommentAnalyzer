@@ -76,7 +76,7 @@ Launch the app using:
 ```bash
 streamlit run app.py
 ```
-### Thank-You Follow Me On IG:
+### Thanks! Follow me on IG → (paste in terminal):
 ```bash
 start https://www.instagram.com/rachit.zip
 ```

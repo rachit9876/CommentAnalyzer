@@ -1,4 +1,4 @@
-# CommentAnalyzer
+# CommentAnalyzer [Replace With Your API key]
 
 **CommentAnalyzer** is a simple and interactive **Streamlit** app that analyzes comments from **YouTube** and **Twitter**, visualizing sentiment, engagement, and more using beautiful plots and emojis.
 

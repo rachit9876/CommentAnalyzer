@@ -78,5 +78,5 @@ streamlit run app.py
 ```
 ### Thank-You Follow Me On IG:
 ```bash
-https://www.instagram.com/rachit.zip
+start https://www.instagram.com/rachit.zip
 ```

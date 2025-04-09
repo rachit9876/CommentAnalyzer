@@ -279,7 +279,7 @@ def main():
     
     # Input section with futuristic styling
     with st.container():
-        st.markdown("### 🚀 INPUT PARAMETERS")
+        st.markdown("### INPUT PARAMETERS")
         col1, col2 = st.columns([3, 1])
         with col1:
             link = st.text_input("ENTER SOCIAL MEDIA URL:", placeholder="https://twitter.com/... or https://youtube.com/...")

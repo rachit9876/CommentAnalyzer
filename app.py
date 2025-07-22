@@ -247,7 +247,7 @@ def main():
     # Main header with animated glowing title
     st.markdown("""
     <div style="text-align: center;">
-        <h1 class="animated-title">⚡ YOUTUBE SENTIMENT ANALYTICS ⚡</h1>
+        <h1 class="animated-title">SENTIMENT ANALYTICS</h1>
         <p style="color: #00f2ff; font-size: 1.2em; text-shadow: 0 0 5px #00f2ff;">
             REAL-TIME YOUTUBE COMMENT SENTIMENT ANALYZER
         </p>

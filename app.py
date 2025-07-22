@@ -272,7 +272,7 @@ def main():
         if st.button("ℹ️ How to get YouTube API Key", key="api_help"):
             st.info("""
             **Steps to get YouTube Data API v3 Key:**
-            1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+            1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
             2. Create a new project or select existing one
             3. Enable "YouTube Data API v3"
             4. Go to "Credentials" and create "API Key"

@@ -6,7 +6,6 @@ import urllib.parse as urlparse
 import matplotlib.pyplot as plt
 import seaborn as sns
 from googleapiclient.discovery import build
-import tweepy
 
 # Custom CSS for ultra-futuristic style with animated title
 st.markdown("""
@@ -169,9 +168,7 @@ st.markdown("""
 # ----- Platform Detection -----
 def extract_platform(link):
     link = link.lower()
-    if "twitter.com" in link or "x.com" in link:
-        return "twitter"
-    elif "youtube.com" in link or "youtu.be" in link:
+    if "youtube.com" in link or "youtu.be" in link:
         return "youtube"
     else:
         return None
@@ -215,31 +212,6 @@ def get_youtube_comments(link, max_results, api_key):
         # Return empty list with error info for the main function to handle
         return []
 
-# ----- Twitter Comments Scraper -----
-def get_twitter_comments(link, max_results):
-    api_key = "yjEL4U6oxUwhktHftscNBv0Qd"
-    api_secret = "9NTt0ILqgJhAEHckvwr7rnbjjAPNTnRppVFLLesduYNaqtWYTm"
-    access_token = "1771301107995648000-xLO2xPSFY75ySAcrYc6deVqizGERRR"
-    access_token_secret = "lWi6ELunFQKODH7RvSui8MPIvXfnkCn0cyyNewcHe23yu"
-
-    tweet_id = re.search(r'status/(\d+)', link)
-    if not tweet_id:
-        return []
-    tweet_id = tweet_id.group(1)
-
-    auth = tweepy.OAuthHandler(api_key, api_secret)
-    auth.set_access_token(access_token, access_token_secret)
-    api = tweepy.API(auth)
-
-    comments = []
-    for tweet in tweepy.Cursor(api.search_tweets, q=f"to:{tweet_id}", tweet_mode="extended").items(max_results):
-        try:
-            comments.append(tweet.full_text)
-        except AttributeError:
-            comments.append(tweet.text)
-
-    return comments
-
 # ----- Text Cleaning -----
 def clean_text(text):
     if not text:
@@ -272,12 +244,12 @@ def classify_sentiment(comment, positive_keywords_set, negative_keywords_set):
 
 # ----- Streamlit App -----
 def main():
-    # Main header with animated glowing white title
+    # Main header with animated glowing title
     st.markdown("""
     <div style="text-align: center;">
-        <h1 class="animated-title">⚡ SENTIMENT ANALYTICS ⚡</h1>
+        <h1 class="animated-title">⚡ YOUTUBE SENTIMENT ANALYTICS ⚡</h1>
         <p style="color: #00f2ff; font-size: 1.2em; text-shadow: 0 0 5px #00f2ff;">
-            REAL-TIME SOCIAL MEDIA SENTIMENT DECODER
+            REAL-TIME YOUTUBE COMMENT SENTIMENT ANALYZER
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -311,42 +283,39 @@ def main():
         
         col1, col2 = st.columns([3, 1])
         with col1:
-            link = st.text_input("ENTER SOCIAL MEDIA URL:", placeholder="https://twitter.com/... or https://youtube.com/...")
+            link = st.text_input("ENTER YOUTUBE URL:", placeholder="https://youtube.com/watch?v=... or https://youtu.be/...")
         with col2:
             max_comments = st.number_input("MAX COMMENTS:", min_value=1, max_value=5000, value=100)
     
     if st.button("⚡ INITIATE ANALYSIS", key="analyze"):
         if not link:
-            st.error("⚠️ NO INPUT DETECTED. PLEASE PROVIDE A VALID URL.")
+            st.error("⚠️ NO INPUT DETECTED. PLEASE PROVIDE A VALID YOUTUBE URL.")
             return
 
         platform = extract_platform(link)
         if not platform:
-            st.error("⚠️ UNSUPPORTED PLATFORM. ONLY TWITTER/X AND YOUTUBE ARE CURRENTLY SUPPORTED.")
+            st.error("⚠️ INVALID URL FORMAT. PLEASE PROVIDE A VALID YOUTUBE URL.")
             return
         
         # Validate API key for YouTube
-        if platform == "youtube" and not api_key:
+        if not api_key:
             st.error("⚠️ YOUTUBE API KEY REQUIRED. PLEASE ENTER YOUR API KEY TO ANALYZE YOUTUBE COMMENTS.")
             return
 
-        with st.status("🛠️ CONNECTING TO DATA STREAM...", expanded=True) as status:
-            st.write("🔍 IDENTIFYING PLATFORM...")
-            st.success(f"✅ PLATFORM LOCKED: {platform.upper()}")
+        with st.status("🛠️ CONNECTING TO YOUTUBE...", expanded=True) as status:
+            st.write("🔍 VALIDATING YOUTUBE URL...")
+            st.success(f"✅ YOUTUBE URL VALIDATED")
             
-            st.write("📡 ESTABLISHING CONNECTION...")
-            if platform == "youtube":
-                comments = get_youtube_comments(link, max_results=max_comments, api_key=api_key)
-                if not comments:
-                    status.update(label="⚠️ YOUTUBE API ERROR", state="error", expanded=False)
-                    st.error("❌ FAILED TO FETCH YOUTUBE COMMENTS. PLEASE CHECK:\n- Your API key is valid\n- The video exists and has comments enabled\n- You haven't exceeded API quotas")
-                    return
-            elif platform == "twitter":
-                comments = get_twitter_comments(link, max_results=max_comments)
+            st.write("📡 FETCHING COMMENTS...")
+            comments = get_youtube_comments(link, max_results=max_comments, api_key=api_key)
+            if not comments:
+                status.update(label="⚠️ YOUTUBE API ERROR", state="error", expanded=False)
+                st.error("❌ FAILED TO FETCH YOUTUBE COMMENTS. PLEASE CHECK:\n- Your API key is valid\n- The video exists and has comments enabled\n- You haven't exceeded API quotas")
+                return
             
             if comments:
                 st.write("🧹 CLEANING DATA STREAM...")
-                data = [(platform, clean_text(comment)) for comment in comments]
+                data = [("youtube", clean_text(comment)) for comment in comments]
                 save_to_csv(data)
                 status.update(label="✅ ANALYSIS COMPLETE", state="complete", expanded=False)
                 st.balloons()

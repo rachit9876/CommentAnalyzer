@@ -1,6 +1,6 @@
-# CommentAnalyzer - Social Media Sentiment Analysis
+# YouTube Comment Sentiment Analyzer
 
-**CommentAnalyzer** is a simple and interactive **Streamlit** app that analyzes comments from **YouTube** and **Twitter**, visualizing sentiment, engagement, and more using beautiful plots and emojis.
+**CommentAnalyzer** is a simple and interactive **Streamlit** app that analyzes comments from **YouTube** videos, visualizing sentiment with beautiful cyberpunk-themed charts and real-time analysis.
 
 ## 🔑 API Setup Required
 
@@ -93,23 +93,24 @@ streamlit run app.py
 
 ### 5. Using the App
 
-1. **Enter your YouTube API Key** in the "API CONFIGURATION" section (for YouTube analysis)
-2. **Enter a social media URL** (YouTube or Twitter/X)
+1. **Enter your YouTube API Key** in the "API CONFIGURATION" section
+2. **Enter a YouTube URL** (e.g., https://youtube.com/watch?v=... or https://youtu.be/...)
 3. **Set the maximum number of comments** to analyze
 4. **Click "⚡ INITIATE ANALYSIS"**
 
-The app will automatically detect the platform and fetch comments for sentiment analysis.
+The app will fetch comments from the YouTube video and perform sentiment analysis.
 
 ---
 
 ## Features
 
-- 🎯 **Real-time sentiment analysis** of social media comments
+- 🎯 **Real-time sentiment analysis** of YouTube comments
 - 🌟 **Futuristic cyberpunk UI** with animated elements
 - 📊 **Beautiful visualizations** with charts and graphs
 - 🔒 **Secure API key input** (password field, not stored)
-- 🚀 **Support for YouTube and Twitter/X**
+- 🚀 **YouTube-focused analysis**
 - 📁 **Data export** to CSV format
+- ⚡ **Fast processing** with real-time progress indicators
 
 ---
 

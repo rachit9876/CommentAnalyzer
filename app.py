@@ -260,31 +260,31 @@ def main():
     with st.container():
         st.markdown("### INPUT PARAMETERS")
         
-        # API Key input section
-        st.markdown("#### 🔑 API CONFIGURATION")
-        api_key = st.text_input(
-            "YOUTUBE API KEY:", 
-            type="password",
-            placeholder="Enter your YouTube Data API v3 key...",
-            help="Get your free API key from Google Cloud Console"
-        )
+        # Create side-by-side layout for API configuration and URL input
+        col1, col2 = st.columns([1, 1])
         
-        if st.button("ℹ️ How to get YouTube API Key", key="api_help"):
-            st.info("""
-            **Steps to get YouTube Data API v3 Key:**
-            1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
-            2. Create a new project or select existing one
-            3. Enable "YouTube Data API v3"
-            4. Go to "Credentials" and create "API Key"
-            5. Copy the API key and paste it above
-            """)
-        
-        st.markdown("---")
-        
-        col1, col2 = st.columns([3, 1])
         with col1:
-            link = st.text_input("ENTER YOUTUBE URL:", placeholder="https://youtube.com/watch?v=... or https://youtu.be/...")
+            st.markdown("#### 🔑 API CONFIGURATION")
+            api_key = st.text_input(
+                "YOUTUBE API KEY:", 
+                type="password",
+                placeholder="Enter your YouTube Data API v3 key...",
+                help="Get your free API key from Google Cloud Console"
+            )
+            
+            if st.button("ℹ️ How to get YouTube API Key", key="api_help"):
+                st.info("""
+                **Steps to get YouTube Data API v3 Key:**
+                1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+                2. Create a new project or select existing one
+                3. Enable "YouTube Data API v3"
+                4. Go to "Credentials" and create "API Key"
+                5. Copy the API key and paste it above
+                """)
+        
         with col2:
+            st.markdown("#### 📺 VIDEO INPUT")
+            link = st.text_input("ENTER YOUTUBE URL:", placeholder="https://youtube.com/watch?v=... or https://youtu.be/...")
             max_comments = st.number_input("MAX COMMENTS:", min_value=1, max_value=5000, value=100)
     
     if st.button("⚡ INITIATE ANALYSIS", key="analyze"):

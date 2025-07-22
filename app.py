@@ -177,36 +177,43 @@ def extract_platform(link):
         return None
 
 # ----- YouTube Comments Scraper -----
-def get_youtube_comments(link, max_results):
-    api_key = "AIzaSyDrkk7LmuT1o_57Z1gx824ktqhsQtXcyvs"  # Replace with your YouTube Data API key
-    parsed_url = urlparse.urlparse(link)
-
-    if "youtu.be" in link:
-        video_id = parsed_url.path.lstrip("/")
-    elif "youtube.com" in link:
-        query_params = urlparse.parse_qs(parsed_url.query)
-        video_id = query_params.get("v", [None])[0]
-    else:
+def get_youtube_comments(link, max_results, api_key):
+    if not api_key:
         return []
+    
+    try:
+        parsed_url = urlparse.urlparse(link)
 
-    if not video_id:
+        if "youtu.be" in link:
+            video_id = parsed_url.path.lstrip("/")
+        elif "youtube.com" in link:
+            query_params = urlparse.parse_qs(parsed_url.query)
+            video_id = query_params.get("v", [None])[0]
+        else:
+            return []
+
+        if not video_id:
+            return []
+
+        youtube = build('youtube', 'v3', developerKey=api_key)
+        comments = []
+
+        request = youtube.commentThreads().list(part="snippet", videoId=video_id, maxResults=100, textFormat="plainText")
+
+        while request and len(comments) < max_results:
+            response = request.execute()
+            for item in response.get('items', []):
+                comment = item['snippet']['topLevelComment']['snippet']['textDisplay']
+                comments.append(comment)
+                if len(comments) >= max_results:
+                    break
+            request = youtube.commentThreads().list_next(request, response)
+
+        return comments
+    
+    except Exception as e:
+        # Return empty list with error info for the main function to handle
         return []
-
-    youtube = build('youtube', 'v3', developerKey=api_key)
-    comments = []
-
-    request = youtube.commentThreads().list(part="snippet", videoId=video_id, maxResults=100, textFormat="plainText")
-
-    while request and len(comments) < max_results:
-        response = request.execute()
-        for item in response.get('items', []):
-            comment = item['snippet']['topLevelComment']['snippet']['textDisplay']
-            comments.append(comment)
-            if len(comments) >= max_results:
-                break
-        request = youtube.commentThreads().list_next(request, response)
-
-    return comments
 
 # ----- Twitter Comments Scraper -----
 def get_twitter_comments(link, max_results):
@@ -280,6 +287,28 @@ def main():
     # Input section with futuristic styling
     with st.container():
         st.markdown("### INPUT PARAMETERS")
+        
+        # API Key input section
+        st.markdown("#### 🔑 API CONFIGURATION")
+        api_key = st.text_input(
+            "YOUTUBE API KEY:", 
+            type="password",
+            placeholder="Enter your YouTube Data API v3 key...",
+            help="Get your free API key from Google Cloud Console"
+        )
+        
+        if st.button("ℹ️ How to get YouTube API Key", key="api_help"):
+            st.info("""
+            **Steps to get YouTube Data API v3 Key:**
+            1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+            2. Create a new project or select existing one
+            3. Enable "YouTube Data API v3"
+            4. Go to "Credentials" and create "API Key"
+            5. Copy the API key and paste it above
+            """)
+        
+        st.markdown("---")
+        
         col1, col2 = st.columns([3, 1])
         with col1:
             link = st.text_input("ENTER SOCIAL MEDIA URL:", placeholder="https://twitter.com/... or https://youtube.com/...")
@@ -295,6 +324,11 @@ def main():
         if not platform:
             st.error("⚠️ UNSUPPORTED PLATFORM. ONLY TWITTER/X AND YOUTUBE ARE CURRENTLY SUPPORTED.")
             return
+        
+        # Validate API key for YouTube
+        if platform == "youtube" and not api_key:
+            st.error("⚠️ YOUTUBE API KEY REQUIRED. PLEASE ENTER YOUR API KEY TO ANALYZE YOUTUBE COMMENTS.")
+            return
 
         with st.status("🛠️ CONNECTING TO DATA STREAM...", expanded=True) as status:
             st.write("🔍 IDENTIFYING PLATFORM...")
@@ -302,7 +336,11 @@ def main():
             
             st.write("📡 ESTABLISHING CONNECTION...")
             if platform == "youtube":
-                comments = get_youtube_comments(link, max_results=max_comments)
+                comments = get_youtube_comments(link, max_results=max_comments, api_key=api_key)
+                if not comments:
+                    status.update(label="⚠️ YOUTUBE API ERROR", state="error", expanded=False)
+                    st.error("❌ FAILED TO FETCH YOUTUBE COMMENTS. PLEASE CHECK:\n- Your API key is valid\n- The video exists and has comments enabled\n- You haven't exceeded API quotas")
+                    return
             elif platform == "twitter":
                 comments = get_twitter_comments(link, max_results=max_comments)
             

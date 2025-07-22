@@ -1,10 +1,24 @@
-# CommentAnalyzer [Replace With Your API key]
+# CommentAnalyzer - Social Media Sentiment Analysis
 
 **CommentAnalyzer** is a simple and interactive **Streamlit** app that analyzes comments from **YouTube** and **Twitter**, visualizing sentiment, engagement, and more using beautiful plots and emojis.
 
+## 🔑 API Setup Required
+
+**IMPORTANT**: You need to provide your own YouTube Data API v3 key to analyze YouTube comments. The app will ask you to enter it in the interface - no need to edit any code files!
+
+### How to Get YouTube API Key:
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable "YouTube Data API v3" in the API Library
+4. Go to "Credentials" and create an "API Key"
+5. Copy the API key - you'll enter it in the app interface
+
 ---
 
-## Open your terminal or command prompt and paste all of them one by one:
+## Installation
+
+### Open your terminal or command prompt and paste all of them one by one:
 
 ```bash
 cd C:\
@@ -76,6 +90,29 @@ Launch the app using:
 ```bash
 streamlit run app.py
 ```
+
+### 5. Using the App
+
+1. **Enter your YouTube API Key** in the "API CONFIGURATION" section (for YouTube analysis)
+2. **Enter a social media URL** (YouTube or Twitter/X)
+3. **Set the maximum number of comments** to analyze
+4. **Click "⚡ INITIATE ANALYSIS"**
+
+The app will automatically detect the platform and fetch comments for sentiment analysis.
+
+---
+
+## Features
+
+- 🎯 **Real-time sentiment analysis** of social media comments
+- 🌟 **Futuristic cyberpunk UI** with animated elements
+- 📊 **Beautiful visualizations** with charts and graphs
+- 🔒 **Secure API key input** (password field, not stored)
+- 🚀 **Support for YouTube and Twitter/X**
+- 📁 **Data export** to CSV format
+
+---
+
 ### Thanks! Follow me on IG → (paste in terminal):
 ```bash
 start https://www.instagram.com/rachit.zip

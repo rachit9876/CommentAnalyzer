@@ -1,6 +1,8 @@
-# YouTube Comment Sentiment Analyzer
+# YouTube Comment Sentiment Analyzer (👉 [Try Now](https://comment-analyzer-kiit.streamlit.app/) )
 
 **CommentAnalyzer** is a powerful and interactive **Streamlit** app that analyzes comments from **YouTube** videos, visualizing sentiment with beautiful cyberpunk-themed charts and real-time analysis.
+
+
 
 ![Cyberpunk UI](https://img.shields.io/badge/UI-Cyberpunk-ff69b4) ![Python](https://img.shields.io/badge/Python-3.6+-blue) ![Streamlit](https://img.shields.io/badge/Streamlit-1.0+-00f2ff)
 

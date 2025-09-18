@@ -1,8 +1,10 @@
 # YouTube Comment Analyzer 
 
-Beta recommended : [Try Now](https://commentanalyzer.pages.dev/)  || 
-Version 01 : [Try Now](https://comment-analyzer-kiit.streamlit.app/)
 
+- **Beta recommended** : [_Try Now_](https://commentanalyzer.pages.dev/)
+- **Version 01** : [_Try Now_](https://comment-analyzer-kiit.streamlit.app/)
+
+#
 **CommentAnalyzer** is a powerful and interactive **Streamlit** app that analyzes comments from **YouTube** videos, visualizing sentiment with beautiful cyberpunk-themed charts and real-time analysis.
 
 

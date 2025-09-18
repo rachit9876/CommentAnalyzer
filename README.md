@@ -1,7 +1,7 @@
 # YouTube Comment Analyzer 
 
 
-- **Beta Version recommended** : [_Try Now_](https://commentanalyzer.pages.dev/)
+- **Beta Version (recommended)** : [_Try Now_](https://commentanalyzer.pages.dev/)
 - **Version 01** : [_Try Now_](https://comment-analyzer-kiit.streamlit.app/)
 
 #

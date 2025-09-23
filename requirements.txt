@@ -1,7 +1,0 @@
-streamlit
-streamlit-extras
-pandas
-matplotlib
-seaborn
-emoji
-google-api-python-client

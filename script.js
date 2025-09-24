@@ -182,13 +182,15 @@ function displaySampleComments(comments, sentiments) {
     
     for (let i = 0; i < sampleCount; i++) {
         const commentDiv = document.createElement('div');
-        commentDiv.className = 'comment-item';
-        
         const sentiment = categorizeSentiment(sentiments[i]);
+        const borderColor = sentiment === 'positive' ? 'border-cyan-400' : 'border-blue-500';
+        const textColor = sentiment === 'positive' ? 'text-cyan-400' : 'text-blue-500';
+        
+        commentDiv.className = `bg-black/40 backdrop-blur-sm rounded-2xl p-4 shadow-lg border-l-4 ${borderColor} transition-all hover:translate-x-1 hover:-translate-y-0.5 hover:shadow-xl`;
         
         commentDiv.innerHTML = `
-            <div class="comment-text">${comments[i]}</div>
-            <div class="comment-sentiment ${sentiment}">${sentiment.charAt(0).toUpperCase() + sentiment.slice(1)}</div>
+            <div class="text-gray-400 mb-2 leading-relaxed">${comments[i]}</div>
+            <div class="text-sm font-semibold uppercase tracking-wide ${textColor}">${sentiment.charAt(0).toUpperCase() + sentiment.slice(1)}</div>
         `;
         
         commentsList.appendChild(commentDiv);
@@ -270,7 +272,12 @@ async function analyzeComments() {
         // Show recommendation
         const recommendation = getRecommendation(positivePercent, negativePercent);
         document.getElementById('recommendation-text').textContent = recommendation.text;
-        document.getElementById('recommendation').className = `recommendation ${recommendation.class}`;
+        const recElement = document.getElementById('recommendation');
+        let bgColor = 'bg-black/30';
+        if (recommendation.class === 'positive') bgColor = 'bg-green-500/20';
+        else if (recommendation.class === 'negative') bgColor = 'bg-red-500/20';
+        else if (recommendation.class === 'neutral') bgColor = 'bg-yellow-500/20';
+        recElement.className = `text-center mb-8 p-6 ${bgColor} rounded-xl border border-white/10`;
         
         // Show results section
         resultsSection.style.display = 'block';

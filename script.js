@@ -149,11 +149,11 @@ function createChart(positive, negative) {
             datasets: [{
                 data: [positive, negative],
                 backgroundColor: [
-                    '#48bb78',
-                    '#f56565'
+                    '#4ade80', // Green-400
+                    '#f87171'  // Red-400
                 ],
                 borderWidth: 3,
-                borderColor: '#ffffff'
+                borderColor: '#000000'
             }]
         },
         options: {
@@ -165,8 +165,11 @@ function createChart(positive, negative) {
                     labels: {
                         padding: 20,
                         font: {
-                            size: 14
-                        }
+                            size: 14,
+                            family: '"Space Grotesk", sans-serif',
+                            weight: 'bold'
+                        },
+                        color: '#000000'
                     }
                 }
             }
@@ -185,14 +188,14 @@ function displaySampleComments(comments, sentiments) {
     for (let i = 0; i < sampleCount; i++) {
         const commentDiv = document.createElement('div');
         const sentiment = categorizeSentiment(sentiments[i]);
-        const borderColor = sentiment === 'positive' ? 'border-cyan-400' : 'border-blue-500';
-        const textColor = sentiment === 'positive' ? 'text-cyan-400' : 'text-blue-500';
+        const bgColor = sentiment === 'positive' ? 'bg-green-100' : 'bg-red-100';
+        const badgeColor = sentiment === 'positive' ? 'bg-green-400' : 'bg-red-400';
         
-        commentDiv.className = `bg-black/40 backdrop-blur-sm rounded-2xl p-4 shadow-lg border-l-4 ${borderColor} transition-all hover:translate-x-1 hover:-translate-y-0.5 hover:shadow-xl`;
+        commentDiv.className = `${bgColor} border-2 border-black p-4 shadow-neo-sm transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none`;
         
         commentDiv.innerHTML = `
-            <div class="text-gray-400 mb-2 leading-relaxed">${comments[i]}</div>
-            <div class="text-sm font-semibold uppercase tracking-wide ${textColor}">${sentiment.charAt(0).toUpperCase() + sentiment.slice(1)}</div>
+            <div class="text-black mb-3 font-medium leading-relaxed">"${comments[i]}"</div>
+            <div class="text-xs font-bold uppercase tracking-wider inline-block px-2 py-1 border border-black ${badgeColor} text-black">${sentiment}</div>
         `;
         
         commentsList.appendChild(commentDiv);
@@ -275,11 +278,11 @@ async function analyzeComments() {
         const recommendation = getRecommendation(positivePercent, negativePercent);
         document.getElementById('recommendation-text').textContent = recommendation.text;
         const recElement = document.getElementById('recommendation');
-        let bgColor = 'bg-black/30';
-        if (recommendation.class === 'positive') bgColor = 'bg-green-500/20';
-        else if (recommendation.class === 'negative') bgColor = 'bg-red-500/20';
-        else if (recommendation.class === 'neutral') bgColor = 'bg-yellow-500/20';
-        recElement.className = `text-center mb-8 p-6 ${bgColor} rounded-xl border border-white/10`;
+        let bgColor = 'bg-white';
+        if (recommendation.class === 'positive') bgColor = 'bg-green-200';
+        else if (recommendation.class === 'negative') bgColor = 'bg-red-200';
+        else if (recommendation.class === 'neutral') bgColor = 'bg-yellow-200';
+        recElement.className = `text-center mb-10 p-6 border-4 border-black ${bgColor} shadow-neo-sm transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none`;
         
         // Show results section
         resultsSection.style.display = 'block';
@@ -300,9 +303,9 @@ async function analyzeComments() {
 document.getElementById('youtube-url').addEventListener('input', function(e) {
     const url = e.target.value;
     if (url && !extractVideoId(url)) {
-        e.target.style.borderColor = '#f56565';
+        e.target.classList.add('bg-red-100');
     } else {
-        e.target.style.borderColor = '#e2e8f0';
+        e.target.classList.remove('bg-red-100');
     }
 });
 

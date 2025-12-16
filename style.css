@@ -79,6 +79,29 @@ body {
     padding: 15px 19px;
 }
 
+textarea {
+    width: 100%;
+    padding: 16px 24px;
+    background: #36343b;
+    border: 1px solid #49454f;
+    border-radius: 20px;
+    color: #e6e1e5;
+    font-size: 16px;
+    font-family: 'Roboto', sans-serif;
+    resize: vertical;
+    transition: all 0.2s;
+}
+
+textarea:hover {
+    border-color: #e6e1e5;
+}
+
+textarea:focus {
+    outline: none;
+    border: 2px solid #d0bcff;
+    padding: 15px 23px;
+}
+
 label {
     display: block;
     font-size: 14px;

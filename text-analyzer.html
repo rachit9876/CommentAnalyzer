@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Sentiment Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="app-bar">
+            <div class="brand">
+                <div class="logo">SA</div>
+                <div>
+                    <div style="font-weight:600">Text Sentiment Analyzer</div>
+                    <div class="muted" style="font-size:12px">Analyze sentiment of any text</div>
+                </div>
+            </div>
+            <div>
+                <a href="index.html" class="btn secondary">YouTube Analyzer</a>
+            </div>
+        </header>
+
+        <section class="card">
+            <div>
+                <label for="text-input">Enter Text</label>
+                <textarea id="text-input" placeholder="Type or paste your text here..." rows="6"></textarea>
+            </div>
+
+            <div class="actions">
+                <button id="analyze-text-btn" class="btn">Analyze Sentiment</button>
+            </div>
+        </section>
+
+        <section id="text-results" class="card" style="display:none">
+            <div id="text-sentiment" style="padding:20px;border-radius:20px;margin-bottom:20px">
+                <div style="font-weight:600;margin-bottom:8px">Sentiment Result</div>
+                <div id="sentiment-label" style="font-size:32px;font-weight:600;margin-bottom:8px"></div>
+                <div id="sentiment-score" class="muted"></div>
+                <div id="sentiment-confidence" class="muted"></div>
+            </div>
+            <div id="matched-tokens" style="padding:16px;background:#36343b;border-radius:12px">
+                <div style="font-weight:500;margin-bottom:12px">Matched Words</div>
+                <div id="tokens-list" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+            </div>
+        </section>
+    </div>
+
+    <script src="sentiment.js"></script>
+    <script>
+        document.getElementById('analyze-text-btn').addEventListener('click', analyzeText);
+        document.getElementById('text-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                analyzeText();
+            }
+        });
+
+        function analyzeText() {
+            const text = document.getElementById('text-input').value.trim();
+            
+            if (!text) {
+                alert('Please enter some text');
+                return;
+            }
+
+            const result = analyzeSentiment(text);
+            const resultsSection = document.getElementById('text-results');
+            const sentimentDiv = document.getElementById('text-sentiment');
+            
+            document.getElementById('sentiment-label').textContent = result.label;
+            document.getElementById('sentiment-score').textContent = `Score: ${result.score}`;
+            document.getElementById('sentiment-confidence').textContent = `Confidence: ${result.confidence}`;
+            
+            if (result.label === 'POSITIVE') {
+                document.getElementById('sentiment-label').style.color = '#efb8c8';
+                sentimentDiv.style.background = 'linear-gradient(90deg, rgba(239, 184, 200, 0.2), transparent)';
+            } else if (result.label === 'NEGATIVE') {
+                document.getElementById('sentiment-label').style.color = '#f2b8b5';
+                sentimentDiv.style.background = 'linear-gradient(90deg, rgba(242, 184, 181, 0.2), transparent)';
+            } else {
+                document.getElementById('sentiment-label').style.color = '#ccc2dc';
+                sentimentDiv.style.background = 'linear-gradient(90deg, rgba(204, 194, 220, 0.2), transparent)';
+            }
+            
+            const tokensList = document.getElementById('tokens-list');
+            tokensList.innerHTML = '';
+            
+            if (result.matched_tokens && result.matched_tokens.length > 0) {
+                result.matched_tokens.forEach(([word, score]) => {
+                    const token = document.createElement('span');
+                    token.textContent = `${word} (${score > 0 ? '+' : ''}${score})`;
+                    token.style.padding = '6px 12px';
+                    token.style.background = score > 0 ? 'rgba(239, 184, 200, 0.2)' : 'rgba(242, 184, 181, 0.2)';
+                    token.style.borderRadius = '100px';
+                    token.style.fontSize = '14px';
+                    tokensList.appendChild(token);
+                });
+            } else {
+                tokensList.innerHTML = '<span class="muted">No sentiment words detected</span>';
+            }
+            
+            resultsSection.style.display = 'block';
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

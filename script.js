@@ -1,22 +1,11 @@
 // Global variables
-let sentimentData = {};
 let chart = null;
 
-// Load sentiment data and saved API key when page loads
-document.addEventListener('DOMContentLoaded', async function() {
-    try {
-        const response = await fetch('sentiment.json');
-        sentimentData = await response.json();
-        console.log('Sentiment data loaded successfully');
-        
-        // Load saved API key
-        const savedApiKey = localStorage.getItem('youtube-api-key');
-        if (savedApiKey) {
-            document.getElementById('api-key').value = savedApiKey;
-        }
-    } catch (error) {
-        console.error('Error loading sentiment data:', error);
-        alert('Error loading sentiment analysis data. Please refresh the page.');
+// Load saved API key when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    const savedApiKey = localStorage.getItem('youtube-api-key');
+    if (savedApiKey) {
+        document.getElementById('api-key').value = savedApiKey;
     }
 });
 
@@ -67,41 +56,10 @@ async function fetchYouTubeComments(videoId, apiKey, maxResults) {
     }
 }
 
-// Analyze sentiment of a single comment
-function analyzeSentiment(comment) {
-    const words = comment.toLowerCase()
-        .replace(/[^\w\s]/g, ' ')
-        .split(/\s+/)
-        .filter(word => word.length > 0);
-    
-    let totalScore = 0;
-    let wordCount = 0;
-    
-    // Check each word against sentiment dictionary
-    words.forEach(word => {
-        if (sentimentData[word] !== undefined) {
-            totalScore += sentimentData[word];
-            wordCount++;
-        }
-    });
-    
-    // Check for phrases (2-word combinations)
-    for (let i = 0; i < words.length - 1; i++) {
-        const phrase = words[i] + ' ' + words[i + 1];
-        if (sentimentData[phrase] !== undefined) {
-            totalScore += sentimentData[phrase];
-            wordCount++;
-        }
-    }
-    
-    // If no sentiment words found, return neutral
-    if (wordCount === 0) {
-        return 0;
-    }
-    
-    // Return average sentiment score
-    return totalScore / wordCount;
-}
+// Sentiment logic moved to sentiment.js (LogixC).
+// That file exposes a global function `analyzeSentiment(text)` which returns
+// an object: { text, label, score, confidence, matched_tokens }.
+// We'll call that function and use the returned `score` for categorization.
 
 // Categorize sentiment score
 function categorizeSentiment(score) {
@@ -182,19 +140,26 @@ function displaySampleComments(comments, sentiments) {
     // Show first 10 comments as samples
     const sampleCount = Math.min(10, comments.length);
     
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     for (let i = 0; i < sampleCount; i++) {
         const commentDiv = document.createElement('div');
         const sentiment = categorizeSentiment(sentiments[i]);
-        const borderColor = sentiment === 'positive' ? 'border-cyan-400' : 'border-blue-500';
-        const textColor = sentiment === 'positive' ? 'text-cyan-400' : 'text-blue-500';
-        
-        commentDiv.className = `bg-black/40 backdrop-blur-sm rounded-2xl p-4 shadow-lg border-l-4 ${borderColor} transition-all hover:translate-x-1 hover:-translate-y-0.5 hover:shadow-xl`;
-        
+        const badgeColor = sentiment === 'positive' ? '#16a34a' : '#ef4444';
+
+        commentDiv.className = 'comment';
         commentDiv.innerHTML = `
-            <div class="text-gray-400 mb-2 leading-relaxed">${comments[i]}</div>
-            <div class="text-sm font-semibold uppercase tracking-wide ${textColor}">${sentiment.charAt(0).toUpperCase() + sentiment.slice(1)}</div>
+            <div style="color:rgba(230,238,248,0.9);margin-bottom:8px">${escapeHtml(comments[i])}</div>
+            <div style="font-weight:600;color:${badgeColor};text-transform:uppercase">${sentiment}</div>
         `;
-        
+
         commentsList.appendChild(commentDiv);
     }
 }
@@ -228,10 +193,10 @@ async function analyzeComments() {
         return;
     }
     
-    // Show loading state
+    // Show loading state (simple text change)
     analyzeBtn.disabled = true;
-    analyzeBtn.querySelector('.btn-text').style.display = 'none';
-    analyzeBtn.querySelector('.loading-spinner').style.display = 'inline';
+    if (!analyzeBtn.dataset.originalText) analyzeBtn.dataset.originalText = analyzeBtn.textContent || 'Analyze';
+    analyzeBtn.textContent = 'Analyzing...';
     
     try {
         // Fetch real YouTube comments
@@ -241,12 +206,20 @@ async function analyzeComments() {
             throw new Error('No comments found for this video');
         }
         
-        // Analyze sentiment for each comment
-        const sentiments = comments.map(comment => analyzeSentiment(comment));
-        
+        // Analyze sentiment for each comment using sentiment.js (LogixC)
+        const sentiments = comments.map(comment => {
+            try {
+                const res = (typeof analyzeSentiment === 'function') ? analyzeSentiment(comment) : null;
+                return res && typeof res.score === 'number' ? res.score : 0;
+            } catch (e) {
+                console.warn('sentiment.js analyze error:', e);
+                return 0;
+            }
+        });
+
         // Categorize sentiments
         let positive = 0, negative = 0;
-        
+
         sentiments.forEach(score => {
             const category = categorizeSentiment(score);
             if (category === 'positive') positive++;
@@ -275,11 +248,17 @@ async function analyzeComments() {
         const recommendation = getRecommendation(positivePercent, negativePercent);
         document.getElementById('recommendation-text').textContent = recommendation.text;
         const recElement = document.getElementById('recommendation');
-        let bgColor = 'bg-black/30';
-        if (recommendation.class === 'positive') bgColor = 'bg-green-500/20';
-        else if (recommendation.class === 'negative') bgColor = 'bg-red-500/20';
-        else if (recommendation.class === 'neutral') bgColor = 'bg-yellow-500/20';
-        recElement.className = `text-center mb-8 p-6 ${bgColor} rounded-xl border border-white/10`;
+        // Apply simple Material-like background tint based on recommendation
+        if (recommendation.class === 'positive') {
+            recElement.style.background = 'linear-gradient(90deg, rgba(34,197,94,0.08), transparent)';
+        } else if (recommendation.class === 'negative') {
+            recElement.style.background = 'linear-gradient(90deg, rgba(239,68,68,0.08), transparent)';
+        } else {
+            recElement.style.background = 'linear-gradient(90deg, rgba(250,204,21,0.08), transparent)';
+        }
+        recElement.style.border = '1px solid rgba(255,255,255,0.06)';
+        recElement.style.padding = '12px';
+        recElement.style.borderRadius = '12px';
         
         // Show results section
         resultsSection.style.display = 'block';
@@ -291,8 +270,10 @@ async function analyzeComments() {
     } finally {
         // Hide loading state
         analyzeBtn.disabled = false;
-        analyzeBtn.querySelector('.btn-text').style.display = 'inline';
-        analyzeBtn.querySelector('.loading-spinner').style.display = 'none';
+        if (analyzeBtn.dataset.originalText) {
+            analyzeBtn.textContent = analyzeBtn.dataset.originalText;
+            delete analyzeBtn.dataset.originalText;
+        }
     }
 }
 

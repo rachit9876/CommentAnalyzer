@@ -14,9 +14,7 @@ document.getElementById('analyze-btn').addEventListener('click', analyzeComments
 document.getElementById('api-key').addEventListener('input', saveApiKey);
 document.getElementById('random-url-btn').addEventListener('click', function() {
     document.getElementById('youtube-url').value = 'https://www.youtube.com/watch?v=YbJOTdZBX1g';
-    
-    //👇Well, I’m aware of it, but bro, it only works on my whitelisted site — so it’s useless for you anyway, LOL.
-    document.getElementById('api-key').value = 'AIzaSyCYIiEO_xynKzt51-dadWc6jO8MMI0Nvbo'; 
+    document.getElementById('api-key').value = 'AIzaSyCYIiEO_xynKzt51-dadWc6jO8MMI0Nvbo';
 });
 
 // Save API key to localStorage
@@ -55,11 +53,6 @@ async function fetchYouTubeComments(videoId, apiKey, maxResults) {
         throw new Error(`Failed to fetch comments: ${error.message}`);
     }
 }
-
-// Sentiment logic moved to sentiment.js (LogixC).
-// That file exposes a global function `analyzeSentiment(text)` which returns
-// an object: { text, label, score, confidence, matched_tokens }.
-// We'll call that function and use the returned `score` for categorization.
 
 // Categorize sentiment score
 function categorizeSentiment(score) {
@@ -193,7 +186,7 @@ async function analyzeComments() {
         return;
     }
     
-    // Show loading state (simple text change)
+    // Show loading state
     analyzeBtn.disabled = true;
     if (!analyzeBtn.dataset.originalText) analyzeBtn.dataset.originalText = analyzeBtn.textContent || 'Analyze';
     analyzeBtn.textContent = 'Analyzing...';
@@ -206,7 +199,7 @@ async function analyzeComments() {
             throw new Error('No comments found for this video');
         }
         
-        // Analyze sentiment for each comment using sentiment.js (LogixC)
+        // Analyze sentiment for each comment
         const sentiments = comments.map(comment => {
             try {
                 const res = (typeof analyzeSentiment === 'function') ? analyzeSentiment(comment) : null;
@@ -248,7 +241,6 @@ async function analyzeComments() {
         const recommendation = getRecommendation(positivePercent, negativePercent);
         document.getElementById('recommendation-text').textContent = recommendation.text;
         const recElement = document.getElementById('recommendation');
-        // Apply simple Material-like background tint based on recommendation
         if (recommendation.class === 'positive') {
             recElement.style.background = 'linear-gradient(90deg, rgba(34,197,94,0.08), transparent)';
         } else if (recommendation.class === 'negative') {

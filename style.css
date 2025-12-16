@@ -66,6 +66,19 @@ body {
     min-width: 240px;
 }
 
+.field-small {
+    flex: 0 0 120px;
+    min-width: 120px;
+}
+
+.field-small select {
+    padding: 16px 20px;
+}
+
+.field-small select:focus {
+    padding: 15px 19px;
+}
+
 label {
     display: block;
     font-size: 14px;
@@ -76,10 +89,10 @@ label {
 
 input, select {
     width: 100%;
-    padding: 16px;
+    padding: 16px 24px;
     background: #36343b;
     border: 1px solid #49454f;
-    border-radius: 12px;
+    border-radius: 100px;
     color: #e6e1e5;
     font-size: 16px;
     transition: all 0.2s;
@@ -92,7 +105,7 @@ input:hover, select:hover {
 input:focus, select:focus {
     outline: none;
     border: 2px solid #d0bcff;
-    padding: 15px;
+    padding: 15px 23px;
 }
 
 input::placeholder {

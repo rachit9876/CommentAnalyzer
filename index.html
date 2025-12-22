@@ -13,6 +13,12 @@
 </head>
 <body>
     <!-- live background removed -->
+    <button id="flow-btn" class="flow-btn" title="View Architecture Flow">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 16V12M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+    </button>
     <div class="container">
         <header class="app-bar">
             <div class="brand">
@@ -101,6 +107,11 @@
 
     <script src="sentiment.js"></script>
     <script src="script.js"></script>
+    <script>
+        document.getElementById('flow-btn').addEventListener('click', () => {
+            window.open('flow.png', '_blank');
+        });
+    </script>
     <!-- Vanta background initialization removed -->
 </body>
 </html>

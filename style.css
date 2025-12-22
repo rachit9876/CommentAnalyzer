@@ -322,6 +322,30 @@ a.btn:hover {
     text-decoration: none;
 }
 
+.flow-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
+    background: #d0bcff;
+    border: none;
+    border-radius: 50%;
+    color: #381e72;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: all 120ms;
+    z-index: 1000;
+}
+
+.flow-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
 @media (max-width: 480px) {
     .app-bar > div:last-child {
         display: flex;

@@ -8,6 +8,131 @@
 
 A web application that analyzes the sentiment of YouTube video comments to help users decide whether a video is worth watching based on viewer feedback.
 
+```mermaid
+make it digarm
+graph TD
+
+%% =========================
+%% ACTORS
+%% =========================
+User["User (Browser User)"]
+
+%% =========================
+%% CLIENT DEVICE
+%% =========================
+subgraph Client["Client Device (Web Browser)"]
+
+    Browser["Web Browser Runtime"]
+
+    %% -------------------------
+    %% UI CONTAINERS
+    %% -------------------------
+    subgraph UI["Presentation Layer (Static HTML + CSS)"]
+
+        IndexUI["YouTube Analyzer UI<br/>index.html"]
+        TextUI["Text Analyzer UI<br/>text-analyzer.html"]
+        Styles["Shared UI Theme<br/>style.css<br/>Material 3 Inspired"]
+
+    end
+
+    %% -------------------------
+    %% APPLICATION LOGIC
+    %% -------------------------
+    subgraph AppLogic["Application Logic (JavaScript)"]
+
+        YTController["YouTube Analysis Controller<br/>script.js"]
+        TextController["Text Analysis Controller<br/>(inline JS)"]
+
+    end
+
+    %% -------------------------
+    %% DOMAIN / CORE
+    %% -------------------------
+    subgraph Domain["Sentiment Domain Engine"]
+
+        SentimentEngine["Sentiment Analyzer<br/>sentiment.js"]
+        Lexicon["Sentiment Lexicon<br/>sentiment.json"]
+
+    end
+
+    %% -------------------------
+    %% VISUALIZATION
+    %% -------------------------
+    subgraph Visualization["Visualization Layer"]
+
+        ChartJS["Chart Renderer<br/>Chart.js"]
+
+    end
+
+end
+
+%% =========================
+%% EXTERNAL SYSTEMS
+%% =========================
+subgraph External["External Services"]
+
+    YouTubeAPI["YouTube Data API v3"]
+    GoogleFonts["Google Fonts CDN"]
+    ChartCDN["Chart.js CDN"]
+
+end
+
+%% =========================
+%% USER INTERACTIONS
+%% =========================
+User --> Browser
+Browser --> IndexUI
+Browser --> TextUI
+
+%% =========================
+%% UI DEPENDENCIES
+%% =========================
+IndexUI --> Styles
+TextUI --> Styles
+Styles --> GoogleFonts
+
+%% =========================
+%% UI → CONTROLLERS
+%% =========================
+IndexUI --> YTController
+TextUI --> TextController
+
+%% =========================
+%% CONTROLLERS → DOMAIN
+%% =========================
+YTController --> SentimentEngine
+TextController --> SentimentEngine
+SentimentEngine --> Lexicon
+
+%% =========================
+%% YOUTUBE DATA FLOW
+%% =========================
+YTController -->|Fetch Comments| YouTubeAPI
+YouTubeAPI -->|Comment Threads JSON| YTController
+
+%% =========================
+%% SENTIMENT PIPELINE
+%% =========================
+YTController -->|Normalized Comments| SentimentEngine
+TextController -->|Raw User Text| SentimentEngine
+
+SentimentEngine -->|Score, Label, Tokens| YTController
+SentimentEngine -->|Score, Label, Tokens| TextController
+
+%% =========================
+%% VISUALIZATION FLOW
+%% =========================
+ChartCDN --> ChartJS
+YTController -->|Aggregated Sentiment Stats| ChartJS
+ChartJS -->|Canvas Render| IndexUI
+
+%% =========================
+%% RESULT RENDERING
+%% =========================
+YTController -->|Counts, Percentages, Recommendation| IndexUI
+TextController -->|Label, Score, Confidence, Tokens| TextUI
+```
+
 ## Features
 
 - **Real-time Comment Analysis**: Fetches actual YouTube comments using the YouTube Data API

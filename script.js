@@ -14,6 +14,7 @@ document.getElementById('analyze-btn').addEventListener('click', analyzeComments
 document.getElementById('api-key').addEventListener('input', saveApiKey);
 document.getElementById('random-url-btn').addEventListener('click', function() {
     document.getElementById('youtube-url').value = 'https://youtu.be/qjwjMA2SIFs';
+    document.getElementById('api-key').value = 'AIzaSyDrkk7LmuT1o_57Z1gx824ktqhsQtXcyvs';
 });
 
 // Save API key to localStorage

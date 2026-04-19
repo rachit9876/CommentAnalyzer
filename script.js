@@ -13,8 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
 document.getElementById('analyze-btn').addEventListener('click', analyzeComments);
 document.getElementById('api-key').addEventListener('input', saveApiKey);
 document.getElementById('random-url-btn').addEventListener('click', function() {
-    document.getElementById('youtube-url').value = 'https://www.youtube.com/watch?v=YbJOTdZBX1g';
-    document.getElementById('api-key').value = 'AIzaSyDrkk7LmuT1o_57Z1gx824ktqhsQtXcyvs';
+    document.getElementById('youtube-url').value = 'https://youtu.be/qjwjMA2SIFs';
 });
 
 // Save API key to localStorage
@@ -27,9 +26,19 @@ function saveApiKey() {
 
 // Extract video ID from YouTube URL
 function extractVideoId(url) {
-    const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/;
-    const match = url.match(regex);
-    return match ? match[1] : null;
+    const patterns = [
+        /(?:youtube\.com\/watch\?v=)([a-zA-Z0-9_-]{11})/, // Standard watch URL
+        /(?:youtu\.be\/)([a-zA-Z0-9_-]{11})/, // Shortened URL
+        /(?:youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/, // Embed URL
+        /(?:youtube\.com\/v\/)([a-zA-Z0-9_-]{11})/, // Old embed format
+        /(?:youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/ // Shorts URL
+    ];
+    
+    for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match) return match[1];
+    }
+    return null;
 }
 
 // Fetch real YouTube comments using API
@@ -41,7 +50,21 @@ async function fetchYouTubeComments(videoId, apiKey, maxResults) {
         const data = await response.json();
         
         if (data.error) {
-            throw new Error(data.error.message);
+            const errorMsg = data.error.message.replace(/<[^>]*>/g, '');
+            if (errorMsg.includes('could not be found')) {
+                throw new Error('Video not found. The video may have been deleted, is private, or the URL is incorrect.');
+            } else if (errorMsg.includes('disabled comments')) {
+                throw new Error('Comments are disabled for this video.');
+            } else if (errorMsg.includes('quota')) {
+                throw new Error('API quota exceeded. Please try again later or use a different API key.');
+            } else if (errorMsg.includes('API key')) {
+                throw new Error('Invalid API key. Please check your YouTube Data API key.');
+            }
+            throw new Error(errorMsg);
+        }
+        
+        if (!data.items || data.items.length === 0) {
+            throw new Error('No comments found. Comments may be disabled or there are no comments yet.');
         }
         
         return data.items.map(item => 
@@ -50,6 +73,13 @@ async function fetchYouTubeComments(videoId, apiKey, maxResults) {
                 .trim()
         );
     } catch (error) {
+        if (error.message.startsWith('Video not found') || 
+            error.message.startsWith('Comments are disabled') ||
+            error.message.startsWith('API quota') ||
+            error.message.startsWith('Invalid API key') ||
+            error.message.startsWith('No comments found')) {
+            throw error;
+        }
         throw new Error(`Failed to fetch comments: ${error.message}`);
     }
 }
@@ -182,9 +212,11 @@ async function analyzeComments() {
     
     const videoId = extractVideoId(url);
     if (!videoId) {
-        alert('Please enter a valid YouTube URL');
+        alert('Invalid YouTube URL. Please use a valid format like:\nhttps://www.youtube.com/watch?v=VIDEO_ID\nor\nhttps://youtu.be/VIDEO_ID');
         return;
     }
+    
+    console.log('Extracted Video ID:', videoId);
     
     // Show loading state
     analyzeBtn.disabled = true;

@@ -13,8 +13,9 @@ document.addEventListener('DOMContentLoaded', function() {
 document.getElementById('analyze-btn').addEventListener('click', analyzeComments);
 document.getElementById('api-key').addEventListener('input', saveApiKey);
 document.getElementById('random-url-btn').addEventListener('click', function() {
-    document.getElementById('youtube-url').value = 'https://youtu.be/qjwjMA2SIFs';
+    document.getElementById('youtube-url').value = 'https://www.youtube.com/watch?v=qjwjMA2SIFs';
     document.getElementById('api-key').value = 'AIzaSyDrkk7LmuT1o_57Z1gx824ktqhsQtXcyvs';
+    saveApiKey();
 });
 
 // Save API key to localStorage
@@ -42,14 +43,21 @@ function extractVideoId(url) {
     return null;
 }
 
-// Fetch real YouTube comments using API
-async function fetchYouTubeComments(videoId, apiKey, maxResults) {
-    const url = `https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=${videoId}&maxResults=${maxResults}&key=${apiKey}&order=relevance`;
-    
-    try {
+// Fetch real YouTube comments using API with pagination support
+async function fetchYouTubeComments(videoId, apiKey, targetCount) {
+    let comments = [];
+    let pageToken = '';
+
+    while (comments.length < targetCount) {
+        const pageSize = Math.min(100, targetCount - comments.length);
+        let url = `https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=${videoId}&maxResults=${pageSize}&key=${apiKey}&order=relevance`;
+        if (pageToken) {
+            url += `&pageToken=${pageToken}`;
+        }
+
         const response = await fetch(url);
         const data = await response.json();
-        
+
         if (data.error) {
             const errorMsg = data.error.message.replace(/<[^>]*>/g, '');
             if (errorMsg.includes('could not be found')) {
@@ -63,63 +71,67 @@ async function fetchYouTubeComments(videoId, apiKey, maxResults) {
             }
             throw new Error(errorMsg);
         }
-        
+
         if (!data.items || data.items.length === 0) {
-            throw new Error('No comments found. Comments may be disabled or there are no comments yet.');
+            if (comments.length === 0) {
+                throw new Error('No comments found. Comments may be disabled or there are no comments yet.');
+            }
+            break;
         }
-        
-        return data.items.map(item => 
+
+        const newComments = data.items.map(item => 
             item.snippet.topLevelComment.snippet.textDisplay
                 .replace(/<[^>]*>/g, '') // Remove HTML tags
                 .trim()
         );
-    } catch (error) {
-        if (error.message.startsWith('Video not found') || 
-            error.message.startsWith('Comments are disabled') ||
-            error.message.startsWith('API quota') ||
-            error.message.startsWith('Invalid API key') ||
-            error.message.startsWith('No comments found')) {
-            throw error;
+
+        comments.push(...newComments);
+
+        if (!data.nextPageToken) {
+            break;
         }
-        throw new Error(`Failed to fetch comments: ${error.message}`);
+        pageToken = data.nextPageToken;
     }
+
+    return comments;
 }
 
-// Categorize sentiment score
+// Categorize sentiment score (3-way)
 function categorizeSentiment(score) {
-    return score >= 0 ? 'positive' : 'negative';
+    if (score > 0.3) return 'positive';
+    if (score < -0.3) return 'negative';
+    return 'neutral';
 }
 
 // Get recommendation based on sentiment analysis
-function getRecommendation(positivePercent, negativePercent) {
-    if (positivePercent >= 70) {
+function getRecommendation(positivePercent, neutralPercent, negativePercent) {
+    if (positivePercent >= 65) {
         return {
-            text: "🎉 Highly Recommended! This video has overwhelmingly positive feedback from viewers. It's likely to be engaging, informative, and worth your time.",
+            text: "🎉 Highly Recommended! Overwhelmingly positive feedback from viewers. It's likely to be engaging and worth your time.",
             class: "positive"
         };
-    } else if (positivePercent >= 60) {
+    } else if (positivePercent >= 50 && positivePercent > negativePercent) {
         return {
-            text: "👍 Recommended! This video has mostly positive feedback. It's probably worth watching.",
+            text: "👍 Recommended! Mostly positive sentiment in viewer comments.",
             class: "positive"
         };
-    } else if (positivePercent >= 40) {
+    } else if (negativePercent >= 45) {
         return {
-            text: "🤔 Mixed Reviews! This video has balanced feedback. Whether you'll enjoy it depends on your personal preferences.",
-            class: "neutral"
+            text: "❌ Not Recommended! This video has predominantly negative feedback.",
+            class: "negative"
         };
     } else {
         return {
-            text: "❌ Not Recommended! This video has predominantly negative feedback. You might want to skip this one.",
-            class: "negative"
+            text: "🤔 Mixed / Neutral Reviews! The video has balanced or mostly neutral feedback.",
+            class: "neutral"
         };
     }
 }
 
-// Create or update the pie chart
-function createChart(positive, negative) {
+// Create or update 3-way pie chart
+function createChart(positive, neutral, negative) {
     const ctx = document.getElementById('sentiment-chart').getContext('2d');
     
-    // Destroy existing chart if it exists
     if (chart) {
         chart.destroy();
     }
@@ -127,15 +139,16 @@ function createChart(positive, negative) {
     chart = new Chart(ctx, {
         type: 'pie',
         data: {
-            labels: ['Positive', 'Negative'],
+            labels: ['Positive', 'Neutral', 'Negative'],
             datasets: [{
-                data: [positive, negative],
+                data: [positive, neutral, negative],
                 backgroundColor: [
-                    '#48bb78',
-                    '#f56565'
+                    '#10b981', // positive (green)
+                    '#9ca3af', // neutral (gray)
+                    '#ef4444'  // negative (red)
                 ],
-                borderWidth: 3,
-                borderColor: '#ffffff'
+                borderWidth: 2,
+                borderColor: '#141414'
             }]
         },
         options: {
@@ -145,10 +158,9 @@ function createChart(positive, negative) {
                 legend: {
                     position: 'bottom',
                     labels: {
-                        padding: 20,
-                        font: {
-                            size: 14
-                        }
+                        color: '#e5e5e5',
+                        padding: 16,
+                        font: { size: 13 }
                     }
                 }
             }
@@ -161,7 +173,6 @@ function displaySampleComments(comments, sentiments) {
     const commentsList = document.getElementById('comments-list');
     commentsList.innerHTML = '';
     
-    // Show first 10 comments as samples
     const sampleCount = Math.min(10, comments.length);
     
     function escapeHtml(str) {
@@ -176,12 +187,14 @@ function displaySampleComments(comments, sentiments) {
     for (let i = 0; i < sampleCount; i++) {
         const commentDiv = document.createElement('div');
         const sentiment = categorizeSentiment(sentiments[i]);
-        const badgeColor = sentiment === 'positive' ? '#16a34a' : '#ef4444';
+        let badgeColor = '#9ca3af';
+        if (sentiment === 'positive') badgeColor = '#10b981';
+        else if (sentiment === 'negative') badgeColor = '#ef4444';
 
-        commentDiv.className = 'comment';
+        commentDiv.className = `comment ${sentiment}`;
         commentDiv.innerHTML = `
-            <div style="color:rgba(230,238,248,0.9);margin-bottom:8px">${escapeHtml(comments[i])}</div>
-            <div style="font-weight:600;color:${badgeColor};text-transform:uppercase">${sentiment}</div>
+            <div style="color:rgba(245,245,245,0.9);margin-bottom:8px">${escapeHtml(comments[i])}</div>
+            <div style="font-weight:600;color:${badgeColor};text-transform:uppercase;font-size:12px">${sentiment}</div>
         `;
 
         commentsList.appendChild(commentDiv);
@@ -217,20 +230,25 @@ async function analyzeComments() {
         return;
     }
     
-    console.log('Extracted Video ID:', videoId);
-    
     // Show loading state
     analyzeBtn.disabled = true;
     if (!analyzeBtn.dataset.originalText) analyzeBtn.dataset.originalText = analyzeBtn.textContent || 'Analyze';
-    analyzeBtn.textContent = 'Analyzing...';
+    analyzeBtn.textContent = 'Fetching Comments...';
     
     try {
-        // Fetch real YouTube comments
+        // Ensure sentiment dictionary initialization is finished
+        if (typeof sentimentInitPromise !== 'undefined') {
+            await sentimentInitPromise;
+        }
+
+        // Fetch real YouTube comments (with pagination loop)
         const comments = await fetchYouTubeComments(videoId, apiKey, commentCount);
         
         if (comments.length === 0) {
             throw new Error('No comments found for this video');
         }
+
+        analyzeBtn.textContent = 'Analyzing Sentiment...';
         
         // Analyze sentiment for each comment
         const sentiments = comments.map(comment => {
@@ -243,47 +261,53 @@ async function analyzeComments() {
             }
         });
 
-        // Categorize sentiments
-        let positive = 0, negative = 0;
+        // Categorize sentiments (3-way)
+        let positive = 0, neutral = 0, negative = 0;
 
         sentiments.forEach(score => {
             const category = categorizeSentiment(score);
             if (category === 'positive') positive++;
-            else negative++;
+            else if (category === 'negative') negative++;
+            else neutral++;
         });
         
         // Calculate percentages
-        const total = positive + negative;
-        const positivePercent = Math.round((positive / total) * 100);
-        const negativePercent = Math.round((negative / total) * 100);
+        const total = positive + neutral + negative;
+        const positivePercent = Math.round((positive / total) * 100) || 0;
+        const neutralPercent = Math.round((neutral / total) * 100) || 0;
+        const negativePercent = Math.round((negative / total) * 100) || 0;
         
         // Update UI
         document.getElementById('positive-count').textContent = positive;
+        const neutralCountElem = document.getElementById('neutral-count');
+        if (neutralCountElem) neutralCountElem.textContent = neutral;
         document.getElementById('negative-count').textContent = negative;
         
         document.getElementById('positive-percentage').textContent = positivePercent + '%';
+        const neutralPercElem = document.getElementById('neutral-percentage');
+        if (neutralPercElem) neutralPercElem.textContent = neutralPercent + '%';
         document.getElementById('negative-percentage').textContent = negativePercent + '%';
         
         // Create chart
-        createChart(positive, negative);
+        createChart(positive, neutral, negative);
         
         // Display sample comments
         displaySampleComments(comments, sentiments);
         
         // Show recommendation
-        const recommendation = getRecommendation(positivePercent, negativePercent);
+        const recommendation = getRecommendation(positivePercent, neutralPercent, negativePercent);
         document.getElementById('recommendation-text').textContent = recommendation.text;
         const recElement = document.getElementById('recommendation');
         if (recommendation.class === 'positive') {
-            recElement.style.background = 'linear-gradient(90deg, rgba(34,197,94,0.08), transparent)';
+            recElement.style.background = 'rgba(16, 185, 129, 0.05)';
+            recElement.style.borderColor = 'rgba(16, 185, 129, 0.2)';
         } else if (recommendation.class === 'negative') {
-            recElement.style.background = 'linear-gradient(90deg, rgba(239,68,68,0.08), transparent)';
+            recElement.style.background = 'rgba(239, 68, 68, 0.05)';
+            recElement.style.borderColor = 'rgba(239, 68, 68, 0.2)';
         } else {
-            recElement.style.background = 'linear-gradient(90deg, rgba(250,204,21,0.08), transparent)';
+            recElement.style.background = 'rgba(156, 163, 175, 0.05)';
+            recElement.style.borderColor = 'rgba(156, 163, 175, 0.2)';
         }
-        recElement.style.border = '1px solid rgba(255,255,255,0.06)';
-        recElement.style.padding = '12px';
-        recElement.style.borderRadius = '12px';
         
         // Show results section
         resultsSection.style.display = 'block';
@@ -318,3 +342,4 @@ document.addEventListener('keypress', function(e) {
         analyzeComments();
     }
 });
+

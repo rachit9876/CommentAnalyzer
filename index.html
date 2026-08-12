@@ -23,11 +23,12 @@
         <header class="app-bar">
             <div class="brand">
                 <div>
-                    <div style="font-weight:600">Sentiment Analyze</div>
-                    <div class="muted" style="font-size:12px">YouTube comments quick insights</div>
+                    <div class="brand-text-main">Sentiment Analyze</div>
+                    <div class="brand-text-sub">YouTube comments quick insights</div>
                 </div>
             </div>
             <div style="display:flex;gap:12px">
+                <a href="api.html" class="btn secondary">API Docs</a>
                 <a href="text-analyzer.html" class="btn secondary">Text Analyzer</a>
                 <button id="random-url-btn" class="btn secondary">Auto Fill [API + URL]</button>
             </div>
@@ -66,9 +67,9 @@
         </section>
 
         <section id="results-section" class="card" style="display:none">
-            <div id="recommendation" style="margin-bottom:18px;">
-                <div style="font-weight:600">Recommendation:</div>
-                <div id="recommendation-text" class="muted">Analyzing...</div>
+            <div id="recommendation">
+                <div id="recommendation-title">Recommendation</div>
+                <div id="recommendation-text">Analyzing...</div>
             </div>
 
             <div class="grid">
@@ -85,19 +86,27 @@
                 <aside>
                     <div class="stats">
                         <div class="stat">
-                            <div>
-                                <div class="muted">Positive Comments</div>
-                                <div id="positive-count" style="font-size:22px;font-weight:600">0</div>
+                            <div class="stat-header">
+                                <div class="stat-title">Positive Comments</div>
                                 <div id="positive-percentage" class="muted">0%</div>
                             </div>
+                            <div id="positive-count" class="stat-value pos">0</div>
                         </div>
 
                         <div class="stat">
-                            <div>
-                                <div class="muted">Negative Comments</div>
-                                <div id="negative-count" style="font-size:22px;font-weight:600">0</div>
+                            <div class="stat-header">
+                                <div class="stat-title">Neutral Comments</div>
+                                <div id="neutral-percentage" class="muted">0%</div>
+                            </div>
+                            <div id="neutral-count" class="stat-value neu">0</div>
+                        </div>
+
+                        <div class="stat">
+                            <div class="stat-header">
+                                <div class="stat-title">Negative Comments</div>
                                 <div id="negative-percentage" class="muted">0%</div>
                             </div>
+                            <div id="negative-count" class="stat-value neg">0</div>
                         </div>
                     </div>
                 </aside>

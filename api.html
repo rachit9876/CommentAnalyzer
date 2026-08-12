@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Docs - Sentiment Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .code-block {
+            background: #1f1f1f;
+            border: 1px solid #2a2a2a;
+            border-radius: 6px;
+            padding: 16px;
+            font-family: monospace;
+            font-size: 13px;
+            color: #e5e5e5;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+        .method-badge {
+            background: #10b981;
+            color: #000;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="app-bar">
+            <div class="brand">
+                <div>
+                    <div class="brand-text-main">API Documentation</div>
+                    <div class="brand-text-sub">Integrate sentiment analysis directly</div>
+                </div>
+            </div>
+            <div style="display:flex;gap:12px">
+                <a href="index.html" class="btn secondary">YouTube Analyzer</a>
+                <a href="text-analyzer.html" class="btn secondary">Text Analyzer</a>
+            </div>
+        </header>
+
+        <section class="card">
+            <h4 style="font-size:18px;margin-bottom:16px"><span class="method-badge">POST</span> /api/analyze</h4>
+            <p style="color:var(--text-secondary);margin-bottom:20px;font-size:14px">
+                Analyze the sentiment of any given text. Returns a JSON object containing the sentiment score, label, and matched words.
+            </p>
+
+            <h4 style="margin-top:24px">Request Format</h4>
+            <div class="code-block">
+{
+  "text": "Your text here"
+}
+            </div>
+
+            <h4 style="margin-top:24px">Example Usage (cURL)</h4>
+            <div class="code-block">
+curl -X POST https://commentanalyzer.pages.dev/api/analyze \
+     -H "Content-Type: application/json" \
+     -d '{"text":"This is an amazing and wonderful API!"}'
+            </div>
+
+            <h4 style="margin-top:24px">Response Format</h4>
+            <div class="code-block">
+{
+  "text": "This is an amazing and wonderful API!",
+  "label": "POSITIVE",
+  "score": 1.2,
+  "confidence": 0.24,
+  "matched_tokens": [
+    ["amazing", 0.6],
+    ["wonderful", 0.6]
+  ]
+}
+            </div>
+        </section>
+
+        <section class="card">
+            <h4 style="font-size:18px;margin-bottom:16px">Interactive API Playground</h4>
+            <p style="color:var(--text-secondary);margin-bottom:20px;font-size:14px">
+                Test the API directly from your browser. Enter some text and see the raw JSON response.
+            </p>
+            
+            <div style="margin-bottom:16px">
+                <label for="api-test-input">Payload Text</label>
+                <textarea id="api-test-input" placeholder="Type text to analyze via API..." rows="3">This new API is really excellent!</textarea>
+            </div>
+            
+            <div class="actions" style="margin-bottom:24px">
+                <button id="test-api-btn" class="btn">Send POST Request</button>
+            </div>
+
+            <div>
+                <label>API Response (JSON)</label>
+                <pre id="api-response" class="code-block" style="min-height:150px;margin-bottom:0">Waiting for request...</pre>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.getElementById('test-api-btn').addEventListener('click', async () => {
+            const text = document.getElementById('api-test-input').value;
+            const responseElement = document.getElementById('api-response');
+            const btn = document.getElementById('test-api-btn');
+            
+            if (!text.trim()) {
+                alert('Please enter some text');
+                return;
+            }
+
+            btn.textContent = 'Sending...';
+            btn.disabled = true;
+            responseElement.textContent = 'Loading...';
+            responseElement.style.borderColor = 'var(--border-color)';
+
+            try {
+                // Determine the URL based on current host
+                const apiUrl = window.location.origin.startsWith('file:') 
+                    ? 'https://commentanalyzer.pages.dev/api/analyze' 
+                    : window.location.origin + '/api/analyze';
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+                
+                const data = await response.json();
+                responseElement.textContent = JSON.stringify(data, null, 2);
+                
+                if (!response.ok) {
+                    responseElement.style.borderColor = '#ef4444';
+                } else {
+                    responseElement.style.borderColor = '#10b981';
+                }
+            } catch (error) {
+                responseElement.textContent = 'Error: ' + error.message;
+                responseElement.style.borderColor = '#ef4444';
+            } finally {
+                btn.textContent = 'Send POST Request';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -13,14 +13,14 @@
     <div class="container">
         <header class="app-bar">
             <div class="brand">
-                <div class="logo">SA</div>
                 <div>
-                    <div style="font-weight:600">Text Sentiment Analyzer</div>
-                    <div class="muted" style="font-size:12px">Analyze sentiment of any text</div>
+                    <div class="brand-text-main">Text Sentiment Analyzer</div>
+                    <div class="brand-text-sub">Analyze sentiment of any text</div>
                 </div>
             </div>
-            <div>
+            <div style="display:flex;gap:12px">
                 <a href="index.html" class="btn secondary">YouTube Analyzer</a>
+                <a href="api.html" class="btn secondary">API Docs</a>
             </div>
         </header>
 
@@ -36,14 +36,14 @@
         </section>
 
         <section id="text-results" class="card" style="display:none">
-            <div id="text-sentiment" style="padding:20px;border-radius:20px;margin-bottom:20px">
-                <div style="font-weight:600;margin-bottom:8px">Sentiment Result</div>
-                <div id="sentiment-label" style="font-size:32px;font-weight:600;margin-bottom:8px"></div>
+            <div id="text-sentiment" style="padding:16px;border-radius:6px;border:1px solid #2a2a2a;margin-bottom:20px;background:#1f1f1f">
+                <div style="font-weight:600;margin-bottom:4px;font-size:14px">Sentiment Result</div>
+                <div id="sentiment-label" style="font-size:24px;font-weight:600;margin-bottom:8px"></div>
                 <div id="sentiment-score" class="muted"></div>
                 <div id="sentiment-confidence" class="muted"></div>
             </div>
-            <div id="matched-tokens" style="padding:16px;background:#36343b;border-radius:12px">
-                <div style="font-weight:500;margin-bottom:12px">Matched Words</div>
+            <div id="matched-tokens" style="padding:16px;background:#1f1f1f;border:1px solid #2a2a2a;border-radius:6px">
+                <div style="font-weight:500;margin-bottom:12px;font-size:14px">Matched Words</div>
                 <div id="tokens-list" style="display:flex;flex-wrap:wrap;gap:8px"></div>
             </div>
         </section>
@@ -75,14 +75,11 @@
             document.getElementById('sentiment-confidence').textContent = `Confidence: ${result.confidence}`;
             
             if (result.label === 'POSITIVE') {
-                document.getElementById('sentiment-label').style.color = '#efb8c8';
-                sentimentDiv.style.background = 'linear-gradient(90deg, rgba(239, 184, 200, 0.2), transparent)';
+                document.getElementById('sentiment-label').style.color = '#10b981';
             } else if (result.label === 'NEGATIVE') {
-                document.getElementById('sentiment-label').style.color = '#f2b8b5';
-                sentimentDiv.style.background = 'linear-gradient(90deg, rgba(242, 184, 181, 0.2), transparent)';
+                document.getElementById('sentiment-label').style.color = '#ef4444';
             } else {
-                document.getElementById('sentiment-label').style.color = '#ccc2dc';
-                sentimentDiv.style.background = 'linear-gradient(90deg, rgba(204, 194, 220, 0.2), transparent)';
+                document.getElementById('sentiment-label').style.color = '#a3a3a3';
             }
             
             const tokensList = document.getElementById('tokens-list');
@@ -92,10 +89,12 @@
                 result.matched_tokens.forEach(([word, score]) => {
                     const token = document.createElement('span');
                     token.textContent = `${word} (${score > 0 ? '+' : ''}${score})`;
-                    token.style.padding = '6px 12px';
-                    token.style.background = score > 0 ? 'rgba(239, 184, 200, 0.2)' : 'rgba(242, 184, 181, 0.2)';
-                    token.style.borderRadius = '100px';
-                    token.style.fontSize = '14px';
+                    token.style.padding = '4px 8px';
+                    token.style.background = score > 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)';
+                    token.style.border = score > 0 ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)';
+                    token.style.borderRadius = '4px';
+                    token.style.fontSize = '13px';
+                    token.style.color = score > 0 ? '#10b981' : '#ef4444';
                     tokensList.appendChild(token);
                 });
             } else {
